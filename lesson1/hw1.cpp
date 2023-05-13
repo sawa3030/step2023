@@ -2,9 +2,7 @@
 
 using namespace std;
 
-vector<string> better_solution(string random_word, vector<string> dictionary) {
-    sort(random_word.begin(), random_word.end()); //与えられた文字列をソート
-
+vector<pair<string, string>> make_new_dictionary (vector<string> dictionary) {
     //ソートした辞書を作成
     vector<pair<string, string>> new_dictionary;
 
@@ -16,6 +14,12 @@ vector<string> better_solution(string random_word, vector<string> dictionary) {
         sort(new_dictionary.at(i).first.begin(), new_dictionary.at(i).first.end());
     }
     sort(new_dictionary.begin(), new_dictionary.end());
+
+    return new_dictionary;
+}
+
+vector<string> better_solution(string random_word, vector<pair<string, string>> new_dictionary) {
+    sort(random_word.begin(), random_word.end()); //与えられた文字列をソート
 
     //二分探索
     vector<string> anagram;
@@ -52,7 +56,9 @@ int main () {
         old_dictionary.push_back(reading_line);
     }
 
-    vector<string> ans = better_solution (random_word, old_dictionary);
+    vector<pair<string, string>> new_dictionary = make_new_dictionary(old_dictionary);
+
+    vector<string> ans = better_solution (random_word, new_dictionary);
 
     for(int i = 0; i < static_cast<int>(ans.size()); i++) {
         cout << ans.at(i) << endl;
