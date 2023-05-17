@@ -63,9 +63,9 @@ map<char, int> alphabet_number = {
 vector<vector<int>> make_new_dictionary (vector<string> dictionary) {
     vector<vector<int>> number_table(dictionary.size(), vector<int>(27));
 
-    for(int i = 0; i < dictionary.size(); i++) {
+    for(long unsigned int i = 0; i < dictionary.size(); i++) {
         int score = 0; 
-        for(int j = 0; j < dictionary.at(i).length(); j++) {
+        for(long unsigned int j = 0; j < dictionary.at(i).length(); j++) {
             char character = dictionary.at(i).at(j);
             number_table.at(i).at(alphabet_number.at(character)) ++;
             score += score_map.at(character);
@@ -79,14 +79,14 @@ vector<vector<int>> make_new_dictionary (vector<string> dictionary) {
 int better_solution(string random_word, vector<vector<int>> new_dictionary) {
     vector<int> counted_random_word(26);
 
-    for(int i = 0; i < random_word.size(); i++) {
+    for(long unsigned int i = 0; i < random_word.size(); i++) {
         char character = random_word.at(i);
         counted_random_word.at(alphabet_number.at(character))++;
     }
 
     int ans_score = 0;
     int ans_num = -1;
-    for(int i = 0; i < new_dictionary.size(); i++) {
+    for(long unsigned int i = 0; i < new_dictionary.size(); i++) {
         bool ans = true;
         for(int j = 0 ; j < 26; j++) {
             if(new_dictionary.at(i).at(j) > counted_random_word.at(j)) {
@@ -95,7 +95,7 @@ int better_solution(string random_word, vector<vector<int>> new_dictionary) {
             }
         }
         if(ans && new_dictionary.at(i).at(26) > ans_score) {
-            ans_num = i;
+            ans_num = static_cast<int>(i);
             ans_score = new_dictionary.at(i).at(26);
         }
     }
