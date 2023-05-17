@@ -76,8 +76,31 @@ vector<vector<int>> make_new_dictionary (vector<string> dictionary) {
     return number_table;
 }
 
-vector<string> better_solution(string random_word, vector<pair<string, string>> new_dictionary) {
-    sort(random_word.begin(), random_word.end()); //与えられた文字列をソート
+int better_solution(string random_word, vector<vector<int>> new_dictionary) {
+    vector<int> counted_random_word(26);
+
+    for(int i = 0; i < random_word.size(); i++) {
+        char character = random_word.at(i);
+        counted_random_word.at(alphabet_number.at(character))++;
+    }
+
+    int ans_score = 0;
+    int ans_num = -1;
+    for(int i = 0; i < new_dictionary.size(); i++) {
+        bool ans = true;
+        for(int j = 0 ; j < 26; j++) {
+            if(new_dictionary.at(i).at(j) > counted_random_word.at(j)) {
+                ans = false;
+                break;
+            }
+        }
+        if(ans && new_dictionary.at(i).at(26) > ans_score) {
+            ans_num = i;
+            ans_score = new_dictionary.at(i).at(26);
+        }
+    }
+
+    return ans_num;
 }
 
 int main () {
@@ -94,12 +117,21 @@ int main () {
 
     vector<vector<int>> new_dictionary = make_new_dictionary(old_dictionary);
 
+    /*
     for(int i = 0; i < new_dictionary.size(); i++) {
         for(int j = 0; j < new_dictionary.at(i).size(); j++) {
             cout << new_dictionary.at(i).at(j) << " ";
         }
         cout << endl;
     }
+    */    
 
-    
+    int ans_num = better_solution(random_word, new_dictionary);
+
+    if(ans_num == -1){
+        cout << "no answer" << endl;
+    } else {
+        string ans = old_dictionary.at(ans_num);
+        cout << ans << endl;
+    }
 }
