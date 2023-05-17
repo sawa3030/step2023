@@ -1,0 +1,105 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+
+map<char, int> score_map = {
+    {'a', 1},
+    {'b', 3},
+    {'c', 2},
+    {'d', 2},
+    {'e', 1},
+    {'f', 3},
+    {'g', 3},    
+    {'h', 1},
+    {'i', 1},
+    {'j', 4},
+    {'k', 4},
+    {'l', 2},
+    {'m', 2},
+    {'n', 1},
+    {'o', 1},
+    {'p', 3},
+    {'q', 4},
+    {'r', 1},
+    {'s', 1},
+    {'t', 1},
+    {'u', 2},
+    {'v', 3},
+    {'w', 3},
+    {'x', 4},
+    {'y', 3},
+    {'z', 4}
+};
+
+map<char, int> alphabet_number = {
+    {'a', 0},
+    {'b', 1},
+    {'c', 2},
+    {'d', 3},
+    {'e', 4},
+    {'f', 5},
+    {'g', 6},    
+    {'h', 7},
+    {'i', 8},
+    {'j', 9},
+    {'k', 10},
+    {'l', 11},
+    {'m', 12},
+    {'n', 13},
+    {'o', 14},
+    {'p', 15},
+    {'q', 16},
+    {'r', 17},
+    {'s', 18},
+    {'t', 19},
+    {'u', 20},
+    {'v', 21},
+    {'w', 22},
+    {'x', 23},
+    {'y', 24},
+    {'z', 25}
+};
+
+vector<vector<int>> make_new_dictionary (vector<string> dictionary) {
+    vector<vector<int>> number_table(dictionary.size(), vector<int>(27));
+
+    for(int i = 0; i < dictionary.size(); i++) {
+        int score = 0; 
+        for(int j = 0; j < dictionary.at(i).length(); j++) {
+            char character = dictionary.at(i).at(j);
+            number_table.at(i).at(alphabet_number.at(character)) ++;
+            score += score_map.at(character);
+        }
+        number_table.at(i).at(26) = score;
+    }
+
+    return number_table;
+}
+
+vector<string> better_solution(string random_word, vector<pair<string, string>> new_dictionary) {
+    sort(random_word.begin(), random_word.end()); //与えられた文字列をソート
+}
+
+int main () {
+    string random_word;
+    cin >> random_word;
+
+    ifstream dictionary_input;
+    dictionary_input.open("words_small.txt", std::ios::in); //後々words.txtに直す
+    string reading_line;
+    vector<string> old_dictionary;
+    while(getline(dictionary_input, reading_line)){
+        old_dictionary.push_back(reading_line);
+    }
+
+    vector<vector<int>> new_dictionary = make_new_dictionary(old_dictionary);
+
+    for(int i = 0; i < new_dictionary.size(); i++) {
+        for(int j = 0; j < new_dictionary.at(i).size(); j++) {
+            cout << new_dictionary.at(i).at(j) << " ";
+        }
+        cout << endl;
+    }
+
+    
+}
