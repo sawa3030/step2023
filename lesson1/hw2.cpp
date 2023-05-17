@@ -104,34 +104,36 @@ int better_solution(string random_word, vector<vector<int>> new_dictionary) {
 }
 
 int main () {
-    string random_word;
-    cin >> random_word;
-
-    ifstream dictionary_input;
-    dictionary_input.open("words_small.txt", std::ios::in); //後々words.txtに直す
+    //random_wordへの入力
+    ifstream random_word_input;
+    random_word_input.open("small.txt", std::ios::in);
     string reading_line;
+    vector<string> random_word;
+    while(getline(random_word_input, reading_line)){
+        random_word.push_back(reading_line);
+    }
+
+    //辞書の入力
+    ifstream dictionary_input;
+    dictionary_input.open("words.txt", std::ios::in); 
     vector<string> old_dictionary;
     while(getline(dictionary_input, reading_line)){
         old_dictionary.push_back(reading_line);
     }
 
-    vector<vector<int>> new_dictionary = make_new_dictionary(old_dictionary);
+    vector<vector<int>> new_dictionary = make_new_dictionary(old_dictionary);  
 
-    /*
-    for(int i = 0; i < new_dictionary.size(); i++) {
-        for(int j = 0; j < new_dictionary.at(i).size(); j++) {
-            cout << new_dictionary.at(i).at(j) << " ";
+    //出力
+    ofstream output("small_answer.txt");
+    for(unsigned long int i = 0; i < random_word.size(); i++) {
+        int ans_num = better_solution(random_word.at(i), new_dictionary);
+
+        if(ans_num == -1){
+            output << "no answer" << endl;
+        } else {
+            string ans = old_dictionary.at(ans_num);
+            output << ans << endl;
         }
-        cout << endl;
     }
-    */    
 
-    int ans_num = better_solution(random_word, new_dictionary);
-
-    if(ans_num == -1){
-        cout << "no answer" << endl;
-    } else {
-        string ans = old_dictionary.at(ans_num);
-        cout << ans << endl;
-    }
 }
