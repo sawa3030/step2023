@@ -103,10 +103,66 @@ int better_solution(string random_word, vector<vector<int>> new_dictionary) {
     return ans_num;
 }
 
+struct counted_word {
+    string word;
+    vector<int> num_of_char;
+    int score = 0;
+
+    bool operator<(const counted_word& another) const {
+        return score > another.score;
+    }
+};
+
+vector<counted_word> make_newer_dictionary (vector<string> dictionary) {
+    vector<counted_word> new_dictionary(dictionary.size());
+
+    for(long unsigned int i = 0; i < dictionary.size(); i++) {
+        vector<int> number_table (26, 0);
+        int score = 0; 
+        for(long unsigned int j = 0; j < dictionary.at(i).length(); j++) {
+            char character = dictionary.at(i).at(j);
+            number_table.at(alphabet_number.at(character)) ++;
+            score += score_map.at(character);
+        }
+        new_dictionary.at(i).word = dictionary.at(i);
+        new_dictionary.at(i).num_of_char = number_table;
+        new_dictionary.at(i).score = score;
+    }
+
+    sort(new_dictionary.begin(), new_dictionary.end());
+
+    return new_dictionary;
+}
+
+string faster_solution(string random_word, vector<counted_word> new_dictionary) {
+    vector<int> counted_random_word(26);
+
+    for(long unsigned int i = 0; i < random_word.size(); i++) {
+        char character = random_word.at(i);
+        counted_random_word.at(alphabet_number.at(character))++;
+    }
+
+    int ans_num = -1;
+    for(long unsigned int i = 0; i < new_dictionary.size(); i++) {
+        bool ans = true;
+        for(int j = 0 ; j < 26; j++) {
+            if(new_dictionary.at(i).num_of_char.at(j) > counted_random_word.at(j)) {
+                ans = false;
+                break;
+            }
+        }
+        if(ans) {
+            return new_dictionary.at(i).word;
+        }
+    }
+
+    return "";
+}
+
 int main () {
     //random_wordへの入力
     ifstream random_word_input;
-    random_word_input.open("small.txt", std::ios::in);
+    random_word_input.open("medium.txt", std::ios::in);
     string reading_line;
     vector<string> random_word;
     while(getline(random_word_input, reading_line)){
@@ -121,10 +177,11 @@ int main () {
         old_dictionary.push_back(reading_line);
     }
 
+    /*
     vector<vector<int>> new_dictionary = make_new_dictionary(old_dictionary);  
 
     //出力
-    ofstream output("small_answer.txt");
+    ofstream output("medium_answer.txt");
     for(unsigned long int i = 0; i < random_word.size(); i++) {
         int ans_num = better_solution(random_word.at(i), new_dictionary);
 
@@ -135,5 +192,21 @@ int main () {
             output << ans << endl;
         }
     }
+    */    
 
+    vector<counted_word> newer_dictionary = make_newer_dictionary(old_dictionary);
+    
+    for(unsigned long int i = 0; i < newer_dictionary.size(); i++) {
+        cout << newer_dictionary.at(i).word << " ";
+        for (int j = 0; j < 26; j++) {
+            cout << newer_dictionary.at(i).num_of_char.at(j) << " ";
+        }
+        cout << newer_dictionary.at(i).score << endl;
+    }
+
+    ofstream output("medium_answer.txt");
+    for(unsigned long int i = 0; i < random_word.size(); i++) {
+        string ans = faster_solution(random_word.at(i), newer_dictionary);
+        output << ans << endl;
+    }
 }
