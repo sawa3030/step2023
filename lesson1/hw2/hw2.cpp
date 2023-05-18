@@ -106,7 +106,7 @@ int better_solution(string random_word, vector<vector<int>> new_dictionary) {
 int main () {
     //random_wordへの入力
     ifstream random_word_input;
-    random_word_input.open("large.txt", std::ios::in);
+    random_word_input.open("small.txt", std::ios::in);
     string reading_line;
     vector<string> random_word;
     while(getline(random_word_input, reading_line)){
@@ -124,7 +124,7 @@ int main () {
     vector<vector<int>> new_dictionary = make_new_dictionary(old_dictionary);  
 
     //出力
-    ofstream output("large_answer.txt");
+    ofstream output("small_answer.txt");
     for(unsigned long int i = 0; i < random_word.size(); i++) {
         int ans_num = better_solution(random_word.at(i), new_dictionary);
 
