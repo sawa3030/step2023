@@ -1,4 +1,4 @@
-import random, sys, time
+import random, sys, time, math
 
 ###########################################################################
 #                                                                         #
@@ -55,34 +55,22 @@ class HashTable:
     # Change table size when the number of item is greater than 
     # 70% of self.bucket_size
     def increase_table_size(self):
-        new_hash_table = HashTable()
-        new_hash_table.bucket_size = round(new_hash_table.item_count / 0.3)
-        if new_hash_table.bucket_size % 2 == 0:
-            new_hash_table.bucket_size += 1
-        
-        for i in range (self.bucket_size):
-            item = self.buckets[i]
+        new_hash_table = HashTable(self.bucket_size)
+        new_hash_table = self
+
+        new_size = math.floor(self.item_count / 0.3)
+        if new_size % 2 == 0:
+            new_size -= 1
+        self.bucket_size = new_size
+        self.buckets = [None] * self.bucket_size
+
+        for i in range (new_hash_table.bucket_size):
+            item = new_hash_table.buckets[i]
             while item:
-                new_hash_table.put(item.key, item.value)
+                new_item = item
+                new_item.next = self.buckets[bucket_index]
+                self.buckets[bucket_index] = new_item
                 item = item.next
-        self = new_hash_table
-        return True
-
-    # Put an item to the new hash table.
-    def put_to_new_hash_table(self, key, value):
-        assert type(key) == str
-        bucket_index = calculate_hash(key) % self.bucket_size
-        item = self.buckets[bucket_index]
-        while item:
-            if item.key == key:
-                item.value = value
-                return False
-            item = item.next
-        new_item = Item(key, value, self.buckets[bucket_index])
-        self.buckets[bucket_index] = new_item
-        self.item_count += 1
-        return True
-
 
     # Put an item to the hash table. If the key already exists, the
     # corresponding value is updated to a new value.
@@ -93,7 +81,6 @@ class HashTable:
     #               and the value is updated.
     def put(self, key, value):
         assert type(key) == str
-        print("1",self.item_count, self.bucket_size)
         self.check_size() # Note: Don't remove this code.
         bucket_index = calculate_hash(key) % self.bucket_size
         item = self.buckets[bucket_index]
@@ -105,23 +92,9 @@ class HashTable:
         new_item = Item(key, value, self.buckets[bucket_index])
         self.buckets[bucket_index] = new_item
         self.item_count += 1
-        print(self.item_count, self.bucket_size)
         
         if self.item_count > 0.7 * self.bucket_size:
-            print("here")
-            new_size = round(self.item_count / 0.3)
-            if new_size % 2 == 0:
-                new_size += 1
-            new_hash_table = HashTable(new_size)
-            
-            for i in range (self.bucket_size):
-                item = self.buckets[i]
-                while item:
-                    assert new_hash_table.put_to_new_hash_table(item.key, item.value) == True
-                    item = item.next
-            self. = new_hash_table
-
-        print(self.item_count, self.bucket_size)
+            self.increase_table_size()
         return True
 
     # Get an item from the hash table.
@@ -158,7 +131,7 @@ class HashTable:
                     self.buckets[bucket_index] = item.next
                 else:
                     item_before.next = item
-                del item #これで消えているか不安
+                del item #これで消えているか不安、デストラクタ
                 self.item_count -= 1
                 return True
             item_before = item
@@ -177,7 +150,6 @@ class HashTable:
     #
     # Note: Don't change this function.
     def check_size(self):
-        # print(self.bucket_size, self.item_count)
         assert (self.bucket_size < 100 or
                 self.item_count >= self.bucket_size * 0.3)
 
