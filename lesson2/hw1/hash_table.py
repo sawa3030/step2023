@@ -16,9 +16,11 @@ import random, sys, time, math
 def calculate_hash(key):
     assert type(key) == str
     # Note: This is not a good hash function. Do you see why?
+    # fixed calculate_hash. But this is working well just because most of the imput key is 0 to 100000000 number
     hash = 0
     for i in key:
-        hash += ord(i)
+        char_num = ord(i)-ord('0')
+        hash += hash * 10 + char_num
     return hash
 
 
@@ -83,6 +85,7 @@ class HashTable:
         assert type(key) == str
         self.check_size() # Note: Don't remove this code.
         bucket_index = calculate_hash(key) % self.bucket_size
+        # print(key, bucket_index)
         item = self.buckets[bucket_index]
         while item:
             if item.key == key:
