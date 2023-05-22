@@ -1,4 +1,4 @@
-import random, sys, time, math
+import random, sys, time
 
 ###########################################################################
 #                                                                         #
@@ -16,11 +16,9 @@ import random, sys, time, math
 def calculate_hash(key):
     assert type(key) == str
     # Note: This is not a good hash function. Do you see why?
-    # fixed calculate_hash. But this is working well just because most of the imput key is 0 to 100000000 number
     hash = 0
     for i in key:
-        char_num = ord(i)-ord('0')
-        hash += hash * 10 + char_num
+        hash += ord(i)
     return hash
 
 
@@ -47,34 +45,12 @@ class Item:
 class HashTable:
 
     # Initialize the hash table.
-    def __init__(self, bucket_size):
+    def __init__(self):
         # Set the initial bucket size to 97. A prime number is chosen to reduce
         # hash conflicts.
-        self.bucket_size = bucket_size
+        self.bucket_size = 97
         self.buckets = [None] * self.bucket_size
         self.item_count = 0
-
-    # Change table size when the number of item is greater than 
-    # 70% of self.bucket_size
-    # 要改善、データが本当に消えているか、temporary_listを使わないで
-    def increase_table_size(self):
-        temporary_list = [None] * self.bucket_size
-        for i in range (self.bucket_size):
-            temporary_list[i] = self.buckets[i]
-
-        new_size = math.floor(self.item_count / 0.3)
-        if new_size % 2 == 0:
-            new_size -= 1
-        self.bucket_size = new_size
-        self.buckets = [None] * self.bucket_size        
-
-        for i in range (len(temporary_list)):
-            item = temporary_list[i]
-            while item:                
-                bucket_index = calculate_hash(item.key) % self.bucket_size
-                new_item = Item(item.key, item.value, self.buckets[bucket_index])
-                self.buckets[bucket_index] = new_item
-                item = item.next
 
     # Put an item to the hash table. If the key already exists, the
     # corresponding value is updated to a new value.
@@ -87,7 +63,6 @@ class HashTable:
         assert type(key) == str
         self.check_size() # Note: Don't remove this code.
         bucket_index = calculate_hash(key) % self.bucket_size
-        # print(key, bucket_index)
         item = self.buckets[bucket_index]
         while item:
             if item.key == key:
@@ -97,9 +72,6 @@ class HashTable:
         new_item = Item(key, value, self.buckets[bucket_index])
         self.buckets[bucket_index] = new_item
         self.item_count += 1
-        
-        if self.item_count > 0.7 * self.bucket_size:
-            self.increase_table_size()
         return True
 
     # Get an item from the hash table.
@@ -127,21 +99,6 @@ class HashTable:
         assert type(key) == str
         #------------------------#
         # Write your code here!  #
-        bucket_index = calculate_hash(key) % self.bucket_size
-        item = self.buckets[bucket_index]
-        item_before = None
-        while item:
-            if item.key == key:
-                if item_before == None:
-                    self.buckets[bucket_index] = item.next
-                else:
-                    item_before.next = item
-                del item #これで消えているか不安、デストラクタ
-                self.item_count -= 1
-                return True
-            item_before = item
-            item = item.next
-        return False
         #------------------------#
         pass
 
@@ -161,7 +118,7 @@ class HashTable:
 
 # Test the functional behavior of the hash table.
 def functional_test():
-    hash_table = HashTable(97)
+    hash_table = HashTable()
 
     assert hash_table.put("aaa", 1) == True
     assert hash_table.get("aaa") == (1, True)
@@ -234,7 +191,7 @@ def functional_test():
 # table when the number of items in the hash table hits some threshold) and
 # 2) tweak the hash function (Hint: think about ways to reduce hash conflicts).
 def performance_test():
-    hash_table = HashTable(97)
+    hash_table = HashTable()
 
     for iteration in range(100):
         begin = time.time()
@@ -247,7 +204,6 @@ def performance_test():
             rand = random.randint(0, 100000000)
             hash_table.get(str(rand))
             assert hash_table.get(str(rand)) == (str(rand), True)
-        print(hash_table.size())
         end = time.time()
         print("%d %.6f" % (iteration, end - begin))
 
@@ -256,12 +212,11 @@ def performance_test():
         for i in range(10000):
             rand = random.randint(0, 100000000)
             hash_table.delete(str(rand))
-        print(hash_table.size())
 
     assert hash_table.size() == 0
     print("Performance tests passed!")
 
 
 if __name__ == "__main__":
-    functional_test()
+    # functional_test()
     performance_test()
