@@ -135,7 +135,7 @@ class HashTable:
                 if item_before == None:
                     self.buckets[bucket_index] = item.next
                 else:
-                    item_before.next = item
+                    item_before.next = item.next
                 del item #これで消えているか不安、デストラクタ
                 self.item_count -= 1
                 return True

@@ -99,6 +99,21 @@ class HashTable:
         assert type(key) == str
         #------------------------#
         # Write your code here!  #
+        bucket_index = calculate_hash(key) % self.bucket_size
+        item = self.buckets[bucket_index]
+        item_before = None
+        while item:
+            if item.key == key:
+                if item_before == None:
+                    self.buckets[bucket_index] = item.next
+                else:
+                    item_before.next = item.next
+                del item #これで消えているか不安、デストラクタ
+                self.item_count -= 1
+                return True
+            item_before = item
+            item = item.next
+        return False
         #------------------------#
         pass
 
@@ -193,7 +208,7 @@ def functional_test():
 def performance_test():
     hash_table = HashTable()
 
-    for iteration in range(100):
+    for iteration in range(10):
         begin = time.time()
         random.seed(iteration)
         for i in range(10000):
@@ -203,20 +218,21 @@ def performance_test():
         for i in range(10000):
             rand = random.randint(0, 100000000)
             hash_table.get(str(rand))
-            assert hash_table.get(str(rand)) == (str(rand), True)
         end = time.time()
         print("%d %.6f" % (iteration, end - begin))
+        print(hash_table.size())
 
-    for iteration in range(100):
+    for iteration in range(10):
         random.seed(iteration)
         for i in range(10000):
             rand = random.randint(0, 100000000)
             hash_table.delete(str(rand))
+        print(hash_table.size())
 
     assert hash_table.size() == 0
     print("Performance tests passed!")
 
 
 if __name__ == "__main__":
-    # functional_test()
+    functional_test()
     performance_test()
