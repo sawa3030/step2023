@@ -62,9 +62,7 @@ class HashTable:
         for i in range (self.bucket_size):
             temporary_list[i] = self.buckets[i]
 
-        new_size = math.floor(self.item_count / 0.3)
-        if new_size % 2 == 0:
-            new_size -= 1
+        new_size = self.item_count * 2 + 1
         self.bucket_size = new_size
         self.buckets = [None] * self.bucket_size        
 
@@ -117,6 +115,28 @@ class HashTable:
                 return (item.value, True)
             item = item.next
         return (None, False)
+    
+    # Change table size when the number of item is greater than 
+    # 70% of self.bucket_size
+    # 要改善、データが本当に消えているか、temporary_listを使わないで
+    def decrease_table_size(self):
+        temporary_list = [None] * self.bucket_size
+        for i in range (self.bucket_size):
+            temporary_list[i] = self.buckets[i]
+
+        new_size = math.floor(self.item_count / 2)
+        if new_size % 2 == 0:
+            new_size -= 1
+        self.bucket_size = new_size
+        self.buckets = [None] * self.bucket_size        
+
+        for i in range (len(temporary_list)):
+            item = temporary_list[i]
+            while item:                
+                bucket_index = calculate_hash(item.key) % self.bucket_size
+                new_item = Item(item.key, item.value, self.buckets[bucket_index])
+                self.buckets[bucket_index] = new_item
+                item = item.next
 
     # Delete an item from the hash table.
     #
@@ -138,6 +158,8 @@ class HashTable:
                     item_before.next = item.next
                 del item #これで消えているか不安、デストラクタ
                 self.item_count -= 1
+                if self.item_count < 0.3 * self.bucket_size and self.bucket_size > 201:
+                    self.decrease_table_size()  
                 return True
             item_before = item
             item = item.next
@@ -247,7 +269,6 @@ def performance_test():
             rand = random.randint(0, 100000000)
             hash_table.get(str(rand))
             assert hash_table.get(str(rand)) == (str(rand), True)
-        print(hash_table.size())
         end = time.time()
         print("%d %.6f" % (iteration, end - begin))
 
@@ -256,7 +277,6 @@ def performance_test():
         for i in range(10000):
             rand = random.randint(0, 100000000)
             hash_table.delete(str(rand))
-        print(hash_table.size())
 
     assert hash_table.size() == 0
     print("Performance tests passed!")
