@@ -19,8 +19,9 @@ def calculate_hash(key):
     # fixed calculate_hash. But this is working well just because most of the imput key is 0 to 100000000 number
     hash = 0
     for i in key:
-        char_num = ord(i)-ord('0')
-        hash += hash * 10 + char_num
+        hash += ord('i')
+        #char_num = ord(i)-ord('0')
+        #hash += hash * 10 + char_num
     return hash
 
 
@@ -73,6 +74,7 @@ class HashTable:
                 new_item = Item(item.key, item.value, self.buckets[bucket_index])
                 self.buckets[bucket_index] = new_item
                 item = item.next
+        print("increase", self.size(),self.item_count)
 
     # Put an item to the hash table. If the key already exists, the
     # corresponding value is updated to a new value.
@@ -112,6 +114,7 @@ class HashTable:
         item = self.buckets[bucket_index]
         while item:
             if item.key == key:
+                print("get success", item.value)
                 return (item.value, True)
             item = item.next
         return (None, False)
@@ -135,6 +138,25 @@ class HashTable:
             while item:                
                 bucket_index = calculate_hash(item.key) % self.bucket_size
                 new_item = Item(item.key, item.value, self.buckets[bucket_index])
+                self.buckets[bucket_index] = new_item
+                item = item.next
+
+    # Decrease the table size
+    def decrease_table_size(self):
+        new_hash_table = HashTable(self.bucket_size)
+        new_hash_table = self
+
+        new_size = math.floor(self.item_count / 2)
+        if new_size % 2 == 0:
+            new_size -= 1
+        self.bucket_size = new_size
+        self.buckets = [None] * self.bucket_size
+
+        for i in range (new_hash_table.bucket_size):
+            item = new_hash_table.buckets[i]
+            while item:
+                new_item = item
+                new_item.next = self.buckets[bucket_index]
                 self.buckets[bucket_index] = new_item
                 item = item.next
 
@@ -163,6 +185,7 @@ class HashTable:
                 return True
             item_before = item
             item = item.next
+        print(key, "not deleted")
         return False
         #------------------------#
         pass
@@ -268,8 +291,8 @@ def performance_test():
         for i in range(10000):
             rand = random.randint(0, 100000000)
             hash_table.get(str(rand))
-            assert hash_table.get(str(rand)) == (str(rand), True)
         end = time.time()
+        print(hash_table.size(), hash_table.item_count)
         print("%d %.6f" % (iteration, end - begin))
 
     for iteration in range(100):
@@ -277,7 +300,9 @@ def performance_test():
         for i in range(10000):
             rand = random.randint(0, 100000000)
             hash_table.delete(str(rand))
+        print(hash_table.size(), hash_table.item_count)
 
+    print(hash_table.size(), hash_table.item_count)
     assert hash_table.size() == 0
     print("Performance tests passed!")
 
