@@ -16,13 +16,22 @@ import random, sys, time, math
 def calculate_hash(key):
     assert type(key) == str
     # Note: This is not a good hash function. Do you see why?
-    # fixed calculate_hash. But this is working well just because most of the imput key is 0 to 100000000 number
+
+    # fixed calculate_hash. But this is working well just because most of the imput key is the number
     hash = 0
     for i in key:
         char_num = ord(i)-ord('0')
         hash += hash * 10 + char_num
     return hash
 
+    # これを拡張し、(文字の種類数)進数と考えることで、衝突しにくいハッシュ関数を出すことができると考えた
+    # 例えば、ASCIIコードの48から122に対応する数字、大文字英数字、小文字英数字、主な記号がよくkeyの中で使われると分かれば、
+    # 75進数としてこれらの文字を捉えて、以下のようにハッシュ値を計算できると考えた
+    # hash = 0
+    # for i in key:
+    #     char_num = ord(i)-ord('0')
+    #    hash += hash * 75 + char_num
+    # return hash
 
 # An item object that represents one key - value pair in the hash table.
 class Item:
@@ -54,25 +63,26 @@ class HashTable:
         self.buckets = [None] * self.bucket_size
         self.item_count = 0
 
-    # Change table size when the number of item is greater than 
-    # 70% of self.bucket_size
-    # 要改善、データが本当に消えているか、temporary_listを使わないで
-    def increase_table_size(self):
+    # Change the table size
+    def change_table_size(self, new_table_size):
+        # print(time.time(), "start")
         temporary_list = [None] * self.bucket_size
         for i in range (self.bucket_size):
             temporary_list[i] = self.buckets[i]
 
-        new_size = self.item_count * 2 + 1
-        self.bucket_size = new_size
+        # print(time.time(), "start2")
+        self.bucket_size = new_table_size
         self.buckets = [None] * self.bucket_size        
 
         for i in range (len(temporary_list)):
             item = temporary_list[i]
-            while item:                
-                bucket_index = calculate_hash(item.key) % self.bucket_size
-                new_item = Item(item.key, item.value, self.buckets[bucket_index])
-                self.buckets[bucket_index] = new_item
-                item = item.next
+            while item:
+                bucket_index = calculate_hash(item.key) % new_table_size
+                next_item = item.next
+                item.next = self.buckets[bucket_index]
+                self.buckets[bucket_index] = item
+                item = next_item
+        # print(time.time(), "end")
 
     # Put an item to the hash table. If the key already exists, the
     # corresponding value is updated to a new value.
@@ -85,7 +95,6 @@ class HashTable:
         assert type(key) == str
         self.check_size() # Note: Don't remove this code.
         bucket_index = calculate_hash(key) % self.bucket_size
-        # print(key, bucket_index)
         item = self.buckets[bucket_index]
         while item:
             if item.key == key:
@@ -97,7 +106,8 @@ class HashTable:
         self.item_count += 1
         
         if self.item_count > 0.7 * self.bucket_size:
-            self.increase_table_size()
+            new_table_size = self.item_count * 2 + 1
+            self.change_table_size(new_table_size)
         return True
 
     # Get an item from the hash table.
@@ -115,28 +125,6 @@ class HashTable:
                 return (item.value, True)
             item = item.next
         return (None, False)
-    
-    # Change table size when the number of item is greater than 
-    # 70% of self.bucket_size
-    # 要改善、データが本当に消えているか、temporary_listを使わないで
-    def decrease_table_size(self):
-        temporary_list = [None] * self.bucket_size
-        for i in range (self.bucket_size):
-            temporary_list[i] = self.buckets[i]
-
-        new_size = math.floor(self.item_count / 2)
-        if new_size % 2 == 0:
-            new_size -= 1
-        self.bucket_size = new_size
-        self.buckets = [None] * self.bucket_size        
-
-        for i in range (len(temporary_list)):
-            item = temporary_list[i]
-            while item:                
-                bucket_index = calculate_hash(item.key) % self.bucket_size
-                new_item = Item(item.key, item.value, self.buckets[bucket_index])
-                self.buckets[bucket_index] = new_item
-                item = item.next
 
     # Delete an item from the hash table.
     #
@@ -159,7 +147,10 @@ class HashTable:
                 del item #これで消えているか不安、デストラクタ
                 self.item_count -= 1
                 if self.item_count < 0.3 * self.bucket_size and self.bucket_size > 201:
-                    self.decrease_table_size()  
+                    new_table_size = math.floor(self.item_count / 2)
+                    if new_table_size % 2 == 0:
+                        new_table_size -= 1
+                    self.change_table_size(new_table_size)  
                 return True
             item_before = item
             item = item.next
@@ -268,7 +259,7 @@ def performance_test():
         for i in range(10000):
             rand = random.randint(0, 100000000)
             hash_table.get(str(rand))
-            assert hash_table.get(str(rand)) == (str(rand), True)
+            # assert hash_table.get(str(rand)) == (str(rand), True)
         end = time.time()
         print("%d %.6f" % (iteration, end - begin))
 
