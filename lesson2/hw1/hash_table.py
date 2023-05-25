@@ -25,7 +25,7 @@ def calculate_hash(key):
     return hash
 
     # これを拡張し、(文字の種類数)進数と考えることで、衝突しにくいハッシュ関数を出すことができると考えた
-    # 例えば、ASCIIコードの48から122に対応する数字、大文字英数字、小文字英数字、主な記号がよくkeyの中で使われると分かれば、
+    # 例えば、ASCIIコードの48から122に対応する数字、大文字英字、小文字英字、記号がよくkeyの中で使われると分かれば、
     # 75進数としてこれらの文字を捉えて、以下のようにハッシュ値を計算できると考えた
     # hash = 0
     # for i in key:
@@ -65,12 +65,10 @@ class HashTable:
 
     # Change the table size
     def change_table_size(self, new_table_size):
-        # print(time.time(), "start")
         temporary_list = [None] * self.bucket_size
         for i in range (self.bucket_size):
             temporary_list[i] = self.buckets[i]
 
-        # print(time.time(), "start2")
         self.bucket_size = new_table_size
         self.buckets = [None] * self.bucket_size        
 
@@ -82,7 +80,6 @@ class HashTable:
                 item.next = self.buckets[bucket_index]
                 self.buckets[bucket_index] = item
                 item = next_item
-        # print(time.time(), "end")
 
     # Put an item to the hash table. If the key already exists, the
     # corresponding value is updated to a new value.
@@ -144,7 +141,7 @@ class HashTable:
                     self.buckets[bucket_index] = item.next
                 else:
                     item_before.next = item.next
-                del item #これで消えているか不安、デストラクタ
+                del item
                 self.item_count -= 1
                 if self.item_count < 0.3 * self.bucket_size and self.bucket_size > 201:
                     new_table_size = math.floor(self.item_count / 2)
@@ -259,7 +256,6 @@ def performance_test():
         for i in range(10000):
             rand = random.randint(0, 100000000)
             hash_table.get(str(rand))
-            # assert hash_table.get(str(rand)) == (str(rand), True)
         end = time.time()
         print("%d %.6f" % (iteration, end - begin))
 
