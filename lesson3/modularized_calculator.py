@@ -66,28 +66,43 @@ def tokenize(line):
 
 # calculate multiply and divide
 def calculate_multiply_and_divide(tokens):
-    index = 1
-    multiply_and_divide_is_calculated_tokens = []
-    multiply_and_divide_is_calculated_tokens.insert(0, {'type': 'PLUS'})
-    multiply_and_divide_is_calculated_tokens_index = 1
+    index = 0
     while index < len(tokens):
         if tokens[index]['type'] == 'NUMBER':
             if tokens[index - 1]['type'] == 'MULTIPLY':
-                multiply_and_divide_is_calculated_tokens[multiply_and_divide_is_calculated_tokens_index-1]['number'] *= tokens[index]['number']
-                index += 1
+                tokens[index-2]['number'] *= tokens[index]['number']
+                del tokens[index - 1: index+1]
+                index -= 1
                 continue
             elif tokens[index - 1]['type'] == 'DIVIDE':
-                multiply_and_divide_is_calculated_tokens[multiply_and_divide_is_calculated_tokens_index-1]['number'] /= tokens[index]['number']
-                index += 1
+                tokens[index-2]['number'] /= tokens[index]['number']
+                del tokens[index - 1: index+1]
+                index -= 1
                 continue
-        elif tokens[index]['type'] == 'MULTIPLY' or tokens[index]['type'] == 'DIVIDE':
-            index += 1
-            continue
-        multiply_and_divide_is_calculated_tokens.append(tokens[index])
-        multiply_and_divide_is_calculated_tokens_index += 1
         index += 1
-    return multiply_and_divide_is_calculated_tokens
+    return tokens
 
+# calculate plus and minus
+def calculate_plus_and_minus(tokens):
+    tokens.insert(0, {'type': 'PLUS'}) # Insert a dummy '+' token
+    answer = 0
+    index = 1
+    while index < len(tokens):
+        if tokens[index]['type'] == 'NUMBER':
+            if tokens[index - 1]['type'] == 'PLUS':
+                answer += tokens[index]['number']
+            elif tokens[index - 1]['type'] == 'MINUS':
+                answer -= tokens[index]['number']
+            else:
+                print('Invalid syntax')
+                exit(1)
+        index += 1
+    return answer
+
+def evaluate_inside_brackets(tokens):
+    tokens = calculate_multiply_and_divide(tokens) # かける、割るの計算を先に行う
+    answer = calculate_plus_and_minus(tokens) # 足す、引くの計算
+    return answer
 
 def calculate(tokens):
     while True:
@@ -114,24 +129,6 @@ def calculate(tokens):
         del tokens[start_brackets: end_brackets+1]
         tokens.insert(start_brackets, {'type': 'NUMBER', 'number': in_brackets_answer})
 
-def evaluate_inside_brackets(tokens):
-    answer = 0
-    tokens.insert(0, {'type': 'PLUS'}) # Insert a dummy '+' token
-    tokens = calculate_multiply_and_divide(tokens) # かける、割るの計算を先に行う
-    index = 1
-    while index < len(tokens):
-        if tokens[index]['type'] == 'NUMBER':
-            if tokens[index - 1]['type'] == 'PLUS':
-                answer += tokens[index]['number']
-            elif tokens[index - 1]['type'] == 'MINUS':
-                answer -= tokens[index]['number']
-            else:
-                print('Invalid syntax')
-                exit(1)
-        index += 1
-    return answer
-
-
 def test(line):
     tokens = tokenize(line)
     actual_answer = calculate(tokens)
@@ -147,6 +144,7 @@ def run_test():
     print("==== Test started! ====")
     test("1+2")
     test("1.0+2.1-3")
+    test("1.0*2.1*3")
     test("3.0+4*2-1/5")
     test("(3.0+4*(2-1))/5")
     print("==== Test finished! ====\n")
