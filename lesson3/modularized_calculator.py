@@ -20,7 +20,6 @@ def read_plus(line, index):
     token = {'type': 'PLUS'}
     return token, index + 1
 
-
 def read_minus(line, index):
     token = {'type': 'MINUS'}
     return token, index + 1
@@ -90,7 +89,7 @@ def calculate_multiply_and_divide(tokens):
     return multiply_and_divide_is_calculated_tokens
 
 
-def calculate_brackets(tokens):
+def calculate(tokens):
     while True:
         # import pdb;pdb.set_trace()
         start_brackets = 0
@@ -103,34 +102,22 @@ def calculate_brackets(tokens):
                 end_brackets = index
                 break
             index += 1
+            # カッコがなくなればそのまま計算して答えを返す
             if index == len(tokens) - 1:
-                answer = evaluate(tokens)
+                answer = evaluate_inside_brackets(tokens)
                 return answer
-
-        # かっこのなかを取り出す
-        in_brackets_tokens = []
-        for index in range (start_brackets+1, end_brackets):
-            in_brackets_tokens.append(tokens[index])
         
         # カッコの中を計算
-        in_brackets_answer = evaluate(in_brackets_tokens)
+        in_brackets_answer = evaluate_inside_brackets(tokens[start_brackets+1: end_brackets])
 
-        new_tokens = []
-        index = 0
-        while index < len(tokens):
-            if index == start_brackets:
-                new_tokens.append({'type': 'NUMBER', 'number': in_brackets_answer})
-                index = end_brackets+1
-            else:
-                new_tokens.append(tokens[index])
-                index += 1
-        
-        tokens = new_tokens
+        # カッコの計算結果でカッコの中身を置き換え
+        del tokens[start_brackets: end_brackets+1]
+        tokens.insert(start_brackets, {'type': 'NUMBER', 'number': in_brackets_answer})
 
-def evaluate(tokens):
+def evaluate_inside_brackets(tokens):
     answer = 0
     tokens.insert(0, {'type': 'PLUS'}) # Insert a dummy '+' token
-    tokens = calculate_multiply_and_divide(tokens)
+    tokens = calculate_multiply_and_divide(tokens) # かける、割るの計算を先に行う
     index = 1
     while index < len(tokens):
         if tokens[index]['type'] == 'NUMBER':
@@ -147,8 +134,7 @@ def evaluate(tokens):
 
 def test(line):
     tokens = tokenize(line)
-    #actual_answer = evaluate(tokens)
-    actual_answer = calculate_brackets(tokens)
+    actual_answer = calculate(tokens)
     expected_answer = eval(line)
     if abs(actual_answer - expected_answer) < 1e-8:
         print("PASS! (%s = %f)" % (line, expected_answer))
@@ -171,5 +157,5 @@ while True:
     print('> ', end="")
     line = input()
     tokens = tokenize(line)
-    answer = evaluate(tokens)
+    answer = calculate(tokens)
     print("answer = %f\n" % answer)
