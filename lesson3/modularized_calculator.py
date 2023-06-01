@@ -100,8 +100,8 @@ def calculate_plus_and_minus(tokens):
     return answer
 
 def evaluate_inside_brackets(tokens):
-    tokens = calculate_multiply_and_divide(tokens) # かける、割るの計算を先に行う
-    answer = calculate_plus_and_minus(tokens) # 足す、引くの計算
+    tokens = calculate_multiply_and_divide(tokens) # 掛け算、割り算の計算を先に行う
+    answer = calculate_plus_and_minus(tokens) # 足し算、引き算の計算
     return answer
 
 def calculate(tokens):
@@ -150,8 +150,8 @@ def run_test():
     test("1.0+2.0")
     test("1.00+2.0")
     test("1.0+2.1-3")
-    test("1.0-2.1-3")
-    test("1.0-2.1-3.00")
+    test("1.0-2.1-5")
+    test("1.0-2.1-10.00")
     test("1+0")
     test("0+0")
     test("10000000000+10000000000000000")
@@ -172,6 +172,7 @@ def run_test():
     test("(3.0+(2.0*3.0-10)*(2-1))/5")
     test("(3.0-(2.0*3.0-10)*(2-1))/5")
     test("(3.0-(2.0*3.0-6)*(2-1))/5")
+    test("3*5*(-7)")
     test("((1000.0*100000000000.0-600000)*(200000000-10000000))/500000000")
     test("0")
     test("1")
