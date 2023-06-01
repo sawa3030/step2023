@@ -110,17 +110,19 @@ def calculate(tokens):
         start_brackets = 0
         end_brackets = 0
         index = 0
+
+        # 最も優先度の高いカッコを見つける
         while index < len(tokens):
             if tokens[index]['type'] == 'START_BRACKETS':
                 start_brackets = index
             elif tokens[index]['type'] == 'END_BRACKETS':
                 end_brackets = index
                 break
-            index += 1
             # カッコがなくなればそのまま計算して答えを返す
             if index == len(tokens) - 1:
                 answer = evaluate_inside_brackets(tokens)
                 return answer
+            index += 1
         
         # カッコの中を計算
         in_brackets_answer = evaluate_inside_brackets(tokens[start_brackets+1: end_brackets])
@@ -143,10 +145,36 @@ def test(line):
 def run_test():
     print("==== Test started! ====")
     test("1+2")
+    test("1.0+2")
+    test("1+2.0")
+    test("1.0+2.0")
+    test("1.00+2.0")
     test("1.0+2.1-3")
-    test("1.0*2.1*3")
+    test("1.0-2.1-3")
+    test("1.0-2.1-3.00")
+    test("1+0")
+    test("0+0")
+    test("10000000000+10000000000000000")
+    test("3*5*7")
+    test("3.0*5*7")
+    test("3.0*5.0*7.0")
+    test("3/5*7")
+    test("3.0*5.0/7.0")
+    test("3.0/5.0/7.0")
+    test("0/5.0/7.0")
+    test("10000000*10000000000/99999999")
     test("3.0+4*2-1/5")
+    test("3.0+4.1*2.1-1.1/5.1")
+    test("3.0+0*2-0.000/5")
     test("(3.0+4*(2-1))/5")
+    test("(3.0+4.9*(2.2-1.1))/5.4")
+    test("(3.0+(6.0-3.0)*(2-1))/5")
+    test("(3.0+(2.0*3.0-10)*(2-1))/5")
+    test("(3.0-(2.0*3.0-10)*(2-1))/5")
+    test("(3.0-(2.0*3.0-6)*(2-1))/5")
+    test("((1000.0*100000000000.0-600000)*(200000000-10000000))/500000000")
+    test("0")
+    test("1")
     print("==== Test finished! ====\n")
 
 run_test()
