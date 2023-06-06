@@ -78,12 +78,13 @@ class Wikipedia:
         #------------------------#
         # Write your code here!  #
         if (start == goal):
-            print(start)
+            # print(start)
             return
 
         queue = collections.deque()
-        paths = [""] * (len(self.titles))
-        print(len(self.titles))
+        # paths = [""] * (len(self.titles))
+        paths = {}
+        # print(len(self.titles))
 
         for id in self.titles.keys():
             if(self.titles[id] == start):
@@ -102,16 +103,17 @@ class Wikipedia:
             node = queue.popleft()
             
             for child_node in self.links[node]:
-                if(paths[child_node] == ""):
-                    print(child_node)
+                if(paths.get(child_node) == None):
+                    # print(child_node)
                     queue.append(child_node)
-                    paths[child_node] = paths[node] + str(child_node)
+                    paths[child_node] = paths[node] + "," + str(child_node)
 
                     if(child_node == goal_index):
                         print("The shortest pass from", start, "to", goal, "is")
-                        for i in range (len(paths[child_node])):
-                            index = int(paths[child_node][i])
-                            print(self.titles[index])
+                        # print("path is", paths[child_node])
+                        ans_path = paths[child_node].split(",")
+                        for i in range (len(ans_path)):
+                            print(self.titles[int(ans_path[i])])
                         print()
         #------------------------#
         pass
@@ -126,7 +128,7 @@ class Wikipedia:
     def calculate_page_ranks(self, prev_page_ranks):
         page_ranks = [0.15] * len(self.titles)
         distribute_all = 0
-        for node_index in range (len(self.titles)):
+        for node_index in self.titles:
             if(len(self.links[node_index]) != 0):
                 distribute = prev_page_ranks[node_index] * 0.85 / len(self.links[node_index])
                 for child_node_index in self.links[node_index]:
