@@ -1,5 +1,6 @@
 import sys
 import collections
+import time
 
 class Wikipedia:
 
@@ -120,23 +121,26 @@ class Wikipedia:
 
     # return True if the page ranks are not changed from the previous page ranks
     def page_ranks_are_fixed(self, prev_page_ranks, page_ranks):
-        for node_index in range (len(page_ranks)):
+        for node_index in self.titles:
             if(abs(prev_page_ranks[node_index] - page_ranks[node_index]) > 0.1):
                 return False
         return True
 
     def calculate_page_ranks(self, prev_page_ranks):
-        page_ranks = [0.15] * len(self.titles)
+        page_ranks = {}
+        for node_index in self.titles:
+            page_ranks[node_index] = 0.15
+            
         distribute_all = 0
         for node_index in self.titles:
             if(len(self.links[node_index]) != 0):
-                distribute = prev_page_ranks[node_index] * 0.85 / len(self.links[node_index])
+                distribute_to_children = prev_page_ranks[node_index] * 0.85 / len(self.links[node_index])
                 for child_node_index in self.links[node_index]:
-                    page_ranks[child_node_index] += distribute
+                    page_ranks[child_node_index] += distribute_to_children
             else:
-                distribute_all += prev_page_ranks
+                distribute_all += prev_page_ranks[node_index] * 0.85
         
-        for node_index in range (len(self.titles)):
+        for node_index in self.titles:
             page_ranks[node_index] += distribute_all / len(self.titles)
 
         return page_ranks
@@ -147,15 +151,19 @@ class Wikipedia:
     def find_most_popular_pages(self):
         #------------------------#
         # Write your code here!  #
-        prev_page_ranks = [0] * len(self.titles) 
-        page_ranks = [1] * len(self.titles) 
+        prev_page_ranks = {}
+        page_ranks = {}
+        for node_index in self.titles:
+            prev_page_ranks[node_index] = 0
+            page_ranks[node_index] = 1
         while(self.page_ranks_are_fixed(prev_page_ranks, page_ranks) == False):
             prev_page_ranks = page_ranks
             page_ranks = self.calculate_page_ranks(prev_page_ranks)
+            print(sum(page_ranks.values()))
 
         most_popular_page_index = 0
         most_popular_page_ranks = 0
-        for node_index in range (len(page_ranks)):
+        for node_index in self.titles:
             if(most_popular_page_ranks < page_ranks[node_index]):
                 most_popular_page_ranks = page_ranks[node_index]
                 most_popular_page_index = node_index
@@ -182,5 +190,5 @@ if __name__ == "__main__":
     wikipedia = Wikipedia(sys.argv[1], sys.argv[2])
     # wikipedia.find_longest_titles()
     # wikipedia.find_most_linked_pages()
-    wikipedia.find_shortest_path("渋谷", "パレートの法則")
+    # wikipedia.find_shortest_path("渋谷", "パレートの法則")
     wikipedia.find_most_popular_pages()
