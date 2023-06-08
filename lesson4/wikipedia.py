@@ -81,13 +81,14 @@ class Wikipedia:
     # Find the shortest path.
     # |start|: The title of the start page.
     # |goal|: The title of the goal page.
-    def find_shortest_path(self, start, goal):
+    # Return True if the shortst path was found. Return False if the shortest path was not found
+    def find_shortest_path(self, start, goal, links, hw3):
         #------------------------#
         # Write your code here!  #
         if (start == goal):
             print(start)
             print(goal)
-            return
+            return False
         
         start_index = self.find_index(start)
         goal_index = self.find_index(goal)
@@ -101,19 +102,26 @@ class Wikipedia:
         while(len(queue) != 0):
             node = queue.popleft()
             
-            for child_node in self.links[node]:
+            for child_node in links[node]:
                 if(paths.get(child_node) == None):
                     queue.append(child_node)
                     paths[child_node] = paths[node] + [child_node]
 
                     if(child_node == goal_index):
-                        print("The shortest pass from", start, "to", goal, "is")
+                        print("The path from", start, "to", goal, "is")
                         for node in paths[goal_index]:
                             print(self.titles[node])
+
+                        # 宿題3のための操作
+                        if hw3 == True:
+                            for id in range (len(paths[goal_index]) - 1):
+                                links[paths[goal_index][id]].remove(paths[goal_index][id+1])
+                            
                         print()
-                        return
+                        return True
         
         print("no path from", start, "to", goal)
+        return False
         #------------------------#
         pass
 
@@ -181,48 +189,19 @@ class Wikipedia:
         pass
 
     # Do something more interesting!!
-    def find_something_more_interesting(self, start, goal):
+    # Find more short paths. The function finds the shortest path, then it will find another path which doesn't use the path earlier.
+    # The function continues to find the shortest path until it doesn't find any path  
+    def find_more_short_paths(self, start, goal):
         #------------------------#
         # Write your code here!  #
-        if (start == goal):
-            print(start)
-            print(goal)
-            return
-        
-        start_index = self.find_index(start)
-        goal_index = self.find_index(goal)
+        links = copy.deepcopy(self.links)
 
-        used = {}
-
-        path_exists = True
-        while(path_exists):
-            path_exists = False
-            queue = collections.deque()
-            paths = {}
-
-            queue.append(start_index)
-            paths[start_index] = str(start_index)
-
-            while(len(queue) != 0):
-                node = queue.popleft()
-                
-                for child_node in self.links[node]:
-                    if(paths.get(child_node) == None and used.get(child_node) == None):
-                        queue.append(child_node)
-                        paths[child_node] = paths[node] + "," + str(child_node)
-
-                        if(child_node == goal_index):
-                            print("The shortest pass from", start, "to", goal, "is")
-                            ans_path = paths[child_node].split(",")
-                            for i in range (len(ans_path)):
-                                print(self.titles[int(ans_path[i])])
-                                if not i == len(ans_path) - 1:
-                                    used[int(ans_path[i])] = True
-                            print()
-                            path_exists = True
-                        
-        
-        print("no path from", start, "to", goal)
+        shortest_path_exists = True
+        count = 0
+        while(shortest_path_exists):
+            shortest_path_exists = self.find_shortest_path(start, goal, links, True)
+            count += 1
+        print("The number of paths is", count - 1)
         #------------------------#
         pass
 
@@ -235,6 +214,6 @@ if __name__ == "__main__":
     wikipedia = Wikipedia(sys.argv[1], sys.argv[2])
     # wikipedia.find_longest_titles()
     # wikipedia.find_most_linked_pages()
-    # wikipedia.find_shortest_path("渋谷", "パレートの法則")
-    wikipedia.find_most_popular_pages()
-    # wikipedia.find_something_more_interesting("渋谷", "パレートの法則")
+    wikipedia.find_shortest_path("渋谷", "パレートの法則", wikipedia.links, False)
+    # wikipedia.find_most_popular_pages()
+    wikipedia.find_more_short_paths("渋谷", "パレートの法則")
