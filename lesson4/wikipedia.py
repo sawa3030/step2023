@@ -1,6 +1,7 @@
 import sys
 import collections
 import time
+import copy
 
 class Wikipedia:
 
@@ -127,21 +128,33 @@ class Wikipedia:
         return True
 
     def calculate_page_ranks(self, prev_page_ranks):
-        page_ranks = {}
-        for node_index in self.titles:
-            page_ranks[node_index] = 0.15
+        print("1", time.time())
+        page_ranks = {key: 0.15 for key in self.titles}
+        print("2", time.time())
+
+        # print(initial_page_ranks)
+        # print(page_ranks)
             
+        print("3", time.time())
         distribute_all = 0
         for node_index in self.titles:
             if(len(self.links[node_index]) != 0):
                 distribute_to_children = prev_page_ranks[node_index] * 0.85 / len(self.links[node_index])
                 for child_node_index in self.links[node_index]:
                     page_ranks[child_node_index] += distribute_to_children
+                print("隣接ノードあり", time.time())
             else:
                 distribute_all += prev_page_ranks[node_index] * 0.85
+                print("隣接ノードなし", time.time())
+        print("4", time.time())
         
         for node_index in self.titles:
             page_ranks[node_index] += distribute_all / len(self.titles)
+            print(type(prev_page_ranks[node_index]))
+        print("5", time.time())
+        
+        # print(initial_page_ranks)
+        # print(page_ranks)
 
         return page_ranks
 
@@ -151,14 +164,20 @@ class Wikipedia:
     def find_most_popular_pages(self):
         #------------------------#
         # Write your code here!  #
+        begin = time.time()
+        # print("find_most_popular_pages started", time.time())
         prev_page_ranks = {}
         page_ranks = {}
         for node_index in self.titles:
             prev_page_ranks[node_index] = 0
             page_ranks[node_index] = 1
+        # print("calculating page ranks started", time.time())
         while(self.page_ranks_are_fixed(prev_page_ranks, page_ranks) == False):
+            # print("1", time.time())
             prev_page_ranks = page_ranks
+            # print("2", time.time())
             page_ranks = self.calculate_page_ranks(prev_page_ranks)
+            # print("3", time.time())
             print(sum(page_ranks.values()))
 
         most_popular_page_index = 0
@@ -168,8 +187,11 @@ class Wikipedia:
                 most_popular_page_ranks = page_ranks[node_index]
                 most_popular_page_index = node_index
         
+        end = time.time()
         print("The most popular page is:")
         print(self.titles[most_popular_page_index])
+
+        print("time is", end-begin)
         #------------------------#
         pass
 
@@ -191,4 +213,4 @@ if __name__ == "__main__":
     # wikipedia.find_longest_titles()
     # wikipedia.find_most_linked_pages()
     # wikipedia.find_shortest_path("渋谷", "パレートの法則")
-    wikipedia.find_most_popular_pages()
+    # wikipedia.find_most_popular_pages()
