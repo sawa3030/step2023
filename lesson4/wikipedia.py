@@ -72,6 +72,11 @@ class Wikipedia:
                 print(self.titles[dst], link_count_max)
         print()
 
+    # return index of the title
+    def find_index(self, title):
+        for id in self.titles.keys():
+            if(self.titles[id] == title):
+                return id
 
     # Find the shortest path.
     # |start|: The title of the start page.
@@ -80,24 +85,16 @@ class Wikipedia:
         #------------------------#
         # Write your code here!  #
         if (start == goal):
-            # print(start)
+            print(start)
+            print(goal)
             return
+        
+        start_index = self.find_index(start)
+        goal_index = self.find_index(goal)
 
         queue = collections.deque()
-        # paths = [""] * (len(self.titles))
         paths = {}
-        # print(len(self.titles))
-
-        for id in self.titles.keys():
-            if(self.titles[id] == start):
-                start_index = id
-                break
-
-        for id in self.titles.keys():
-            if(self.titles[id] == goal):
-                goal_index = id
-                break
-
+        
         queue.append(start_index)
         paths[start_index] = str(start_index)
 
@@ -106,16 +103,14 @@ class Wikipedia:
             
             for child_node in self.links[node]:
                 if(paths.get(child_node) == None):
-                    # print(child_node)
                     queue.append(child_node)
                     paths[child_node] = paths[node] + "," + str(child_node)
 
                     if(child_node == goal_index):
                         print("The shortest pass from", start, "to", goal, "is")
-                        # print("path is", paths[child_node])
-                        ans_path = paths[child_node].split(",")
-                        for i in range (len(ans_path)):
-                            print(self.titles[int(ans_path[i])])
+                        ans_paths = paths[child_node].split(",")
+                        for node in ans_paths:
+                            print(self.titles[int(node)])
                         print()
                         return
         
@@ -123,13 +118,14 @@ class Wikipedia:
         #------------------------#
         pass
 
-    # return True if the page ranks are not changed from the previous page ranks
+    # return True if the page ranks of all the nodes are not changed from the previous page ranks
     def page_ranks_are_fixed(self, prev_page_ranks, page_ranks):
         for node_index in self.titles:
             if(abs(prev_page_ranks[node_index] - page_ranks[node_index]) > 0.1):
                 return False
         return True
 
+    # calculate the page ranks for one time
     def calculate_page_ranks(self, prev_page_ranks):
         # print("1", time.time())
         page_ranks = {key: 0.15 for key in self.titles}
@@ -258,6 +254,6 @@ if __name__ == "__main__":
     wikipedia = Wikipedia(sys.argv[1], sys.argv[2])
     # wikipedia.find_longest_titles()
     # wikipedia.find_most_linked_pages()
-    # wikipedia.find_shortest_path("渋谷", "パレートの法則")
+    wikipedia.find_shortest_path("渋谷", "パレートの法則")
     # wikipedia.find_most_popular_pages()
-    wikipedia.find_something_more_interesting("渋谷", "パレートの法則")
+    # wikipedia.find_something_more_interesting("渋谷", "パレートの法則")
