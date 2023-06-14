@@ -47,20 +47,6 @@ def two_opt(cities, tour):
 
     is_updated = True
     print(sum_distance)
-    """ for i in range(N-1):
-        for j in range(i+1, N-1): 
-            #print("i=", i, "j=", j)
-            # print(dist[tour[i]][tour[j]])
-            # print(dist[tour[j+1]][tour[i+1]])
-            # print(dist[tour[i]][tour[i+1]])
-            # print(dist[tour[j]][tour[j+1]])
-            #print(tour)
-            if(dist[tour[i]][tour[j]] + dist[tour[j+1]][tour[i+1]] < dist[tour[i]][tour[i+1]] + dist[tour[j]][tour[j+1]]):
-                part_of_list = tour[i+1:j+1]
-                part_of_list.reverse()
-                tour = tour[0:i+1] + part_of_list + tour[j+1:N]
-                new_sum_distance = new_sum_distance - (dist[tour[i]][tour[i+1]] + dist[tour[j]][tour[j+1]]) + (dist[tour[i]][tour[j]] + dist[tour[j+1]][tour[i+1]])
-    print(new_sum_distance) """
 
     tour.append(0)
     while(is_updated):
@@ -75,13 +61,14 @@ def two_opt(cities, tour):
                     is_updated = True
                     print(sum_distance)
 
-    print("final=",sum_distance)
-    return tour[:N+1]
+    print("final sum =",sum_distance)
+    return tour[:N]
 
 
 if __name__ == '__main__':
     assert len(sys.argv) > 1
-    tour = solve(read_input(sys.argv[1]))
-    tour = two_opt(read_input(sys.argv[1]), tour)
+    cities = read_input(sys.argv[1])
+    tour = solve(cities)
+    tour = two_opt(cities, tour)
     print_tour(tour)
     write_output(sys.argv[2], tour)
