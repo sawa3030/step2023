@@ -30,6 +30,7 @@ def solve(cities):
         current_city = next_city
     return tour
 
+
 def two_opt(cities, tour):
     N = len(cities)
     
@@ -46,7 +47,6 @@ def two_opt(cities, tour):
     sum_distance += dist[prev_city][0]
 
     is_updated = True
-    print(sum_distance)
 
     tour.append(0)
     while(is_updated):
@@ -59,7 +59,7 @@ def two_opt(cities, tour):
                     part_of_list.reverse()
                     tour = tour[:i+1] + part_of_list + tour[j+1:]
                     is_updated = True
-                    print(sum_distance)
+                    # print(sum_distance)
 
     print("final sum =",sum_distance)
     return tour[:N]

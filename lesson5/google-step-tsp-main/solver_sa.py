@@ -5,6 +5,7 @@ import math
 import random
 
 from common import print_tour, read_input, write_output
+from solver_greedy import two_opt
 
 
 def distance(city1, city2):
@@ -40,11 +41,11 @@ def solve_sa(distances, tour, t, c):
     tour_next = tour
     sum_of_dist = calc_sum_of_dist(distances, tour)
     sum_of_dist_next = sum_of_dist
-    random.seed(0)
+    random.seed(1)
 
     i = 0
-    while (i < 10000):
-        print(i)
+    while (t > 10):
+        # print(i)
         
         a = random.randint(0, N-3)
         b = random.randint(a+2, N-1)
@@ -65,20 +66,22 @@ def solve_sa(distances, tour, t, c):
         elif random.random() < math.e ** (-d / t):
             tour = tour_next
             sum_of_dist = sum_of_dist_next
-            print("moved to worse solution", sum_of_dist)
+            # print("moved to worse solution", sum_of_dist)
         # else:
             # print("no change", sum_of_dist)
-        print(sum_of_dist)
+        # print(sum_of_dist)
         t = c * t
         i += 1
     
-    return tour
+    return tour[:N]
 
 if __name__ == '__main__':
     assert len(sys.argv) > 1
+
     cities = read_input(sys.argv[1])
     distances = calc_distances(cities)
     tour = solve_random(cities)
-    tour = solve_sa(distances, tour, 5000, 0.9)
-    print_tour(tour)
+    tour = solve_sa(distances, tour, 10000, 0.9)
+    tour = two_opt(cities, tour)
+    # print_tour(tour)
     write_output(sys.argv[2], tour)
