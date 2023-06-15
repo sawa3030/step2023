@@ -6,7 +6,7 @@ import random
 
 from common import print_tour, read_input, write_output
 from solver_greedy import two_opt
-
+import solver_random
 
 def distance(city1, city2):
     return math.sqrt((city1[0] - city2[0]) ** 2 + (city1[1] - city2[1]) ** 2)
@@ -27,11 +27,6 @@ def calc_sum_of_dist(distances, tour):
         prev_city = tour[id]
     sum_of_distances += distances[prev_city][0]
     return sum_of_distances
-
-def solve_random(cities):
-    # Build a trivial solution.
-    # Visit the cities in the order they appear in the input.
-    return list(range(len(cities)))
 
 # |t|: 初期温度
 # |c|: 冷却率 
@@ -80,7 +75,7 @@ if __name__ == '__main__':
 
     cities = read_input(sys.argv[1])
     distances = calc_distances(cities)
-    tour = solve_random(cities)
+    tour = solver_random.solve(cities)
     tour = solve_sa(distances, tour, 10000, 0.9)
     tour = two_opt(cities, tour)
     # print_tour(tour)
