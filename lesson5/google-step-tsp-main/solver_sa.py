@@ -8,9 +8,11 @@ from common import print_tour, read_input, write_output
 import solver_two_opt
 import solver_random
 
+
 # 2点間の距離の計算
 def distance(city1, city2):
     return math.sqrt((city1[0] - city2[0]) ** 2 + (city1[1] - city2[1]) ** 2)
+
 
 # 全ての2点間の距離を計算する
 # 返り値は全ての2点間の距離を持つ二次配列
@@ -22,6 +24,7 @@ def calc_distances(cities):
             distances[i][j] = distances[j][i] = distance(cities[i], cities[j])
     return distances
 
+
 # |tour|: 道順
 # 道順に対する総距離
 def calc_sum_of_dist(distances, tour):
@@ -32,6 +35,7 @@ def calc_sum_of_dist(distances, tour):
         prev_city = tour[id]
     sum_of_distances += distances[prev_city][0]
     return sum_of_distances
+
 
 # 焼きなまし法による実装
 # |t|: 初期温度
@@ -45,7 +49,9 @@ def solve_sa(distances, tour, t, c):
     random.seed(1)
 
     i = 0
-    while (t > 10): # tが十分小さくなれば総距離が短くなる方向への変化のみを許す2opt法と実質的には変わらず、2opt法をとればよいと考えた
+    while (t > 10): 
+    # tが十分小さくなれば総距離が短くなる方向への変化のみを許す2opt法と実質的には変わらない。よってtが十分小さくなった時点で2opt法へ移行する
+    # diffの平均値は0, 標準偏差は500程度になった。よって、t<10となれば下記の条件分岐におけるmath.e ** (-diff / t)が十分0に近くなり、tが十分小さくなったと考えられる
         # [0, tour[1] , ... , tour[a], tour[a+1], ... , tour[b], tour[b+1], ..., tour[N-1], 0] となっているtour（道順）の配列を
         # [0, tour[1] , ... , tour[a], tour[b], ... , tour[b+1], tour[a+1], ..., tour[N-1], 0] と変えたとした時を考える
         a = random.randint(0, N-3)
@@ -68,6 +74,7 @@ def solve_sa(distances, tour, t, c):
         i += 1
     
     return tour[:N]
+
 
 if __name__ == '__main__':
     assert len(sys.argv) > 1
