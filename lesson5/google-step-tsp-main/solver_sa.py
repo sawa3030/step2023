@@ -45,7 +45,7 @@ def solve_sa(distances, tour, t, c):
     random.seed(1)
 
     i = 0
-    while (t > 10): # 総距離の変化は100程度のオーダーが多い。t>10となれば総距離が短くなる方向への変化のみを許す2opt法と実質的には変わらず、2opt法をとればよいと考えた
+    while (t > 10): # tが十分小さくなれば総距離が短くなる方向への変化のみを許す2opt法と実質的には変わらず、2opt法をとればよいと考えた
         # [0, tour[1] , ... , tour[a], tour[a+1], ... , tour[b], tour[b+1], ..., tour[N-1], 0] となっているtour（道順）の配列を
         # [0, tour[1] , ... , tour[a], tour[b], ... , tour[b+1], tour[a+1], ..., tour[N-1], 0] と変えたとした時を考える
         a = random.randint(0, N-3)
@@ -63,7 +63,7 @@ def solve_sa(distances, tour, t, c):
             part_of_list.reverse()
             tour = tour[:a+1] + part_of_list + tour[b+1:]
             sum_of_dist += diff
-            
+
         t = c * t
         i += 1
     
