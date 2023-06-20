@@ -47,8 +47,6 @@ def solve_sa(distances, tour, t, c):
 
     sum_of_dist = calc_sum_of_dist(distances, tour)
 
-    random.seed(1)
-
     i = 0
     while (t > 10): 
     # tが十分小さくなれば総距離が短くなる方向への変化のみを許す2opt法と実質的には変わらない。よってtが十分小さくなった時点で2opt法へ移行する
@@ -87,8 +85,8 @@ if __name__ == '__main__':
     best_sum_of_dist = calc_sum_of_dist(distances, best_tour)
 
     for i in range(10):
-        tour = solver_random.solve(cities)
-        # tour = solver_greedy.solve(cities)
+        # tour = solver_random.solve(cities)
+        tour = solver_greedy.solve(cities)
         tour = solve_sa(distances, tour, 10000, 0.9)
         tour = solver_two_opt.solve_two_opt(cities, tour)
         sum_of_dist = calc_sum_of_dist(distances, tour)
