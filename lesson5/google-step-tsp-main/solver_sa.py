@@ -7,6 +7,7 @@ import random
 from common import print_tour, read_input, write_output
 import solver_two_opt
 import solver_random
+import solver_greedy
 
 
 # 2点間の距離の計算
@@ -81,7 +82,20 @@ if __name__ == '__main__':
 
     cities = read_input(sys.argv[1])
     distances = calc_distances(cities)
-    tour = solver_random.solve(cities)
-    tour = solve_sa(distances, tour, 10000, 0.9)
-    tour = solver_two_opt.solve_two_opt(cities, tour)
-    write_output(sys.argv[2], tour)
+
+    best_tour = solver_random.solve(cities)
+    best_sum_of_dist = calc_sum_of_dist(distances, best_tour)
+
+    for i in range(10):
+        tour = solver_random.solve(cities)
+        # tour = solver_greedy.solve(cities)
+        tour = solve_sa(distances, tour, 10000, 0.9)
+        tour = solver_two_opt.solve_two_opt(cities, tour)
+        sum_of_dist = calc_sum_of_dist(distances, tour)
+
+        if(best_sum_of_dist > sum_of_dist):
+            best_tour = tour
+            best_sum_of_dist = sum_of_dist
+
+    print("best sum =", best_sum_of_dist)
+    write_output(sys.argv[2], best_tour)
