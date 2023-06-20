@@ -41,13 +41,18 @@ def calc_sum_of_dist(distances, tour):
 # 焼きなまし法による実装
 # |t|: 初期温度
 # |c|: 冷却率 
-def solve_sa(distances, tour, t, c):
+# |random_seed|: 繰り返しごとのrandom.seedに与える値
+def solve_sa(distances, tour, t, c, random_seed):
     tour.append(0)
     N = len(cities)
 
     sum_of_dist = calc_sum_of_dist(distances, tour)
+    random.seed(random_seed)
 
-    i = 0
+    count_better = 0
+    count_worse = 0
+    count_no_change = 0
+
     while (t > 10): 
     # tが十分小さくなれば総距離が短くなる方向への変化のみを許す2opt法と実質的には変わらない。よってtが十分小さくなった時点で2opt法へ移行する
     # diffの平均値は0, 標準偏差は500程度になった。よって、t<10となれば下記の条件分岐におけるmath.e ** (-diff / t)が十分0に近くなり、tが十分小さくなったと考えられる
@@ -63,15 +68,21 @@ def solve_sa(distances, tour, t, c):
             part_of_list.reverse()
             tour = tour[:a+1] + part_of_list + tour[b+1:]
             sum_of_dist += diff
+            count_better += 1
         elif random.random() < math.e ** (-diff / t): # 総距離が長くなっている場合でも、ある確率で新しい道順にアップデート
             part_of_list = tour[a+1:b+1]
             part_of_list.reverse()
             tour = tour[:a+1] + part_of_list + tour[b+1:]
             sum_of_dist += diff
+            count_worse += 1
+        else:
+            count_no_change += 1
 
         t = c * t
-        i += 1
     
+    print("count_better:", count_better)
+    print("count_worse:", count_worse)
+    print("count_no_change:", count_no_change)
     return tour[:N]
 
 
@@ -87,7 +98,7 @@ if __name__ == '__main__':
     for i in range(10):
         # tour = solver_random.solve(cities)
         tour = solver_greedy.solve(cities)
-        tour = solve_sa(distances, tour, 10000, 0.9)
+        tour = solve_sa(distances, tour, 10000, 0.9, i)
         tour = solver_two_opt.solve_two_opt(cities, tour)
         sum_of_dist = calc_sum_of_dist(distances, tour)
 
