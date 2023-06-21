@@ -10,7 +10,7 @@ def distance(city1, city2):
     return math.sqrt((city1[0] - city2[0]) ** 2 + (city1[1] - city2[1]) ** 2)
 
 
-def solve(cities):
+def solve(cities, start_city = 0):
     N = len(cities)
 
     dist = [[0] * N for i in range(N)]
@@ -18,7 +18,7 @@ def solve(cities):
         for j in range(i, N):
             dist[i][j] = dist[j][i] = distance(cities[i], cities[j])
 
-    current_city = 0
+    current_city = start_city
     unvisited_cities = set(range(1, N))
     tour = [current_city]
 
