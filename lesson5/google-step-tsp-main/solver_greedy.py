@@ -22,7 +22,6 @@ def solve(cities, dist, start_city = 0):
 
     current_city = start_city
     unvisited_cities = set(range(0, N))
-    print(start_city)
     unvisited_cities.remove(start_city)
     tour = [current_city]
 

@@ -35,7 +35,7 @@ def solve_two_opt(cities, dist, tour, start_city):
     sum_distance = calc_sum_of_dist(dist, tour, start_city)
 
     is_updated = True
-    prev_i = -1
+    prev_i = -1 # 前のループで経路を変更しなかった範囲をprev_iとして保存し、次のループでprev_iからNの範囲を探索する
 
     tour.append(0)
     while(is_updated):

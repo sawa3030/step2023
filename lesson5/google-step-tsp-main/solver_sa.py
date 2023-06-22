@@ -43,6 +43,7 @@ def calc_sum_of_dist(distances, tour, start_city = 0):
 # |c|: 冷却率 
 # |random_seed|: 繰り返しごとのrandom.seedに与える値
 def solve_sa(distances, tour, t, c, random_seed, start_city = 0):
+    # 輪となる経路を考えるため、tour(経路)の最後に始点のノードを入れる
     tour.append(start_city)
     N = len(cities)
 
@@ -70,7 +71,7 @@ def solve_sa(distances, tour, t, c, random_seed, start_city = 0):
             tour = tour[:a+1] + part_of_list + tour[b+1:]
             sum_of_dist += diff
             count_better += 1
-        elif random.random() < math.e ** (-diff / (0.1 ** (i / 100)) / 500): # 総距離が長くなっている場合でも、ある確率で新しい道順にアップデート
+        elif random.random() < math.e ** (-diff / (0.5 ** (i / 100)) / 500): # 総距離が長くなっている場合でも、ある確率で新しい道順にアップデート
             part_of_list = tour[a+1:b+1]
             part_of_list.reverse()
             tour = tour[:a+1] + part_of_list + tour[b+1:]
@@ -94,10 +95,9 @@ if __name__ == '__main__':
     distances = calc_distances(cities)
 
     best_sum_of_dist = 1000000000
-    #start_city = random.randint(0, len(cities)-1)
     start_city = 0
 
-    for i in range(20):        
+    for i in range(10):        
         tour = solver_greedy.solve(cities, distances, start_city)
         tour = solve_sa(distances, tour, 10000, 0.9, i, start_city)
         tour = solver_two_opt.solve_two_opt(cities, distances, tour, start_city)
