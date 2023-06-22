@@ -9,17 +9,21 @@ from common import print_tour, read_input, write_output
 def distance(city1, city2):
     return math.sqrt((city1[0] - city2[0]) ** 2 + (city1[1] - city2[1]) ** 2)
 
-
-def solve(cities, start_city = 0):
+def calc_distances(cities):
     N = len(cities)
-
-    dist = [[0] * N for i in range(N)]
+    distances = [[0] * N for i in range(N)]
     for i in range(N):
         for j in range(i, N):
-            dist[i][j] = dist[j][i] = distance(cities[i], cities[j])
+            distances[i][j] = distances[j][i] = distance(cities[i], cities[j])
+    return distances
+
+def solve(cities, dist, start_city = 0):
+    N = len(cities)
 
     current_city = start_city
-    unvisited_cities = set(range(1, N))
+    unvisited_cities = set(range(0, N))
+    print(start_city)
+    unvisited_cities.remove(start_city)
     tour = [current_city]
 
     while unvisited_cities:
@@ -34,6 +38,7 @@ def solve(cities, start_city = 0):
 if __name__ == '__main__':
     assert len(sys.argv) > 1
     cities = read_input(sys.argv[1])
-    tour = solve(cities)
+    distances = calc_distances(cities)
+    tour = solve(cities, distances)
     print_tour(tour)
     write_output(sys.argv[2], tour)
