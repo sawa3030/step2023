@@ -31,6 +31,7 @@ typedef struct my_metadata_t {
 } my_metadata_t;
 
 typedef struct my_heap_t {
+  // my_metadata_t *free_heads[4];
   my_metadata_t *free_head;
   my_metadata_t dummy;
 } my_heap_t;
@@ -44,7 +45,24 @@ my_heap_t my_heap;
 // Helper functions (feel free to add/remove/edit!)
 //
 
+int check_bin_num(my_metadata_t *metadata) {
+  int bin_num = 3;
+  for(int i = 0; i < 3; i++) {
+    if(metadata->size < (i+1) * 1000) {
+      bin_num = i;
+      break;
+    }
+  }
+  return bin_num;
+}
+
 void my_add_to_free_list(my_metadata_t *metadata) {
+  /*
+  int bin_num = check_bin_num(metadata);
+  metadata->next = my_heaps[bin_num].free_head;
+  my_heaps[bin_num].free_head = metadata;
+  */
+
   assert(!metadata->next);
   metadata->next = my_heap.free_head;
   my_heap.free_head = metadata;
@@ -54,6 +72,10 @@ void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev) {
   if (prev) {
     prev->next = metadata->next;
   } else {
+    /*
+    int bin_num = check_bin_num(metadata);
+    my_heaps[bin_num].free_head = metadata->next;
+    */
     my_heap.free_head = metadata->next;
   }
   metadata->next = NULL;
@@ -65,6 +87,11 @@ void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev) {
 
 // This is called at the beginning of each challenge.
 void my_initialize() {
+  for(int i = 0; i < 4; i++) {
+    my_heap.free_head = &my_heap.dummy;
+    my_heap.dummy.size = 0;
+    my_heap.dummy.next = NULL;
+  }
   my_heap.free_head = &my_heap.dummy;
   my_heap.dummy.size = 0;
   my_heap.dummy.next = NULL;
@@ -83,7 +110,7 @@ void *my_malloc(size_t size) {
   // TODO: Update this logic to Best-fit!
   while (metadata) {
     if(metadata->size >= size) {
-      if(best_metadata == NULL || best_metadata->size > metadata->size) {
+      if(best_metadata == NULL || best_metadata->size < metadata->size) {
         best_prev = prev;
         best_metadata = metadata;
       }
