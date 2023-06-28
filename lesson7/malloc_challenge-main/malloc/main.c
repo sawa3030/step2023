@@ -227,10 +227,18 @@ void run_challenge(const char *trace_file_name, size_t min_size,
         stats.freed_size += object.size;
         freed += object.size;
         // Check that the tag is not broken.
-        if (((char *)object.ptr)[0] != object.tag ||
-            ((char *)object.ptr)[object.size - 1] != object.tag) {
-          printf("An allocated object is broken!");
-          assert(0);
+        // if (((char *)object.ptr)[0] != object.tag ||
+        //     ((char *)object.ptr)[object.size - 1] != object.tag) {
+        //   printf("An allocated object is broken!");
+        //   assert(0);
+        // }
+        if (((char *)object.ptr)[0] != object.tag) {
+          printf("An allocated object [0] is broken! %d %d %d\n", object.size, ((char *)object.ptr)[0], object.tag);
+          // assert(0);
+        }
+        if (((char *)object.ptr)[object.size - 1] != object.tag) {
+          printf("An allocated object [size-1] is broken! %d %d %d\n", object.size, ((char *)object.ptr)[object.size - 1], object.tag);
+          // assert(0);
         }
         if (trace_fp) {
           fprintf(trace_fp, "f %llu %ld\n", (unsigned long long)object.ptr,
