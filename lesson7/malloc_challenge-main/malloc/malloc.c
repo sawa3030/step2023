@@ -13,6 +13,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include<stdio.h>
+
+FILE *fp;
 
 //
 // Interfaces to get memory pages from OS
@@ -96,9 +99,6 @@ void my_initialize() {
 // mmap_from_system() / munmap_to_system().
 void *my_malloc(size_t size) {
   int bin_num = check_bin_num(size);
-  if (bin_num != 0) {
-    printf("non 0 bin_num!!!!!!!!!");
-  }
   my_metadata_t *metadata;
   my_metadata_t *prev;
   my_metadata_t *best_metadata = NULL;
@@ -150,6 +150,12 @@ void *my_malloc(size_t size) {
     return my_malloc(size);
   }
 
+  if (fp) {
+    fprintf(fp, "%ld,", size);
+  } else {
+    fp = fopen("size.txt", "w");
+  }
+
   // |ptr| is the beginning of the allocated object.
   //
   // ... | metadata | object | ...
@@ -176,7 +182,6 @@ void *my_malloc(size_t size) {
     // Add the remaining free slot to the free list.
     my_add_to_free_list(new_metadata);
   }
-  // printf("my_malloc");
   return ptr;
 }
 
@@ -190,7 +195,6 @@ void my_free(void *ptr) {
   //     metadata   ptr
   my_metadata_t *metadata = (my_metadata_t *)ptr - 1;
   // Add the free slot to the free list.
-  // printf("my_free");
   my_add_to_free_list(metadata);
 }
 
