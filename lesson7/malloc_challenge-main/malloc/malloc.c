@@ -28,8 +28,6 @@ void munmap_to_system(void *ptr, size_t size);
 typedef struct my_metadata_t {
   size_t size;
   struct my_metadata_t *next;
-  size_t left_size;
-  struct my_metadata_t *prev;
 } my_metadata_t;
 
 typedef struct my_heap_t {
@@ -46,7 +44,7 @@ my_heap_t my_heap;
 // Helper functions (feel free to add/remove/edit!)
 //
 
-int check_bin_num(size_t size) {
+int get_bin_num(size_t size) {
   int bin_num = 11;
   int max_of_the_bin = 2;
   for(int i = 0; i < 11; i++) {
@@ -61,14 +59,7 @@ int check_bin_num(size_t size) {
 
 void my_add_to_free_list(my_metadata_t *metadata) {
   assert(!metadata->next);
-  /* // ... | left_metadata | object or free slot | metadata | free slot | right_metadata | object or free slot | ...
-  // 
-  my_metadata_t *right_metadata = (my_metadata_t *)((char *)(metadata + 1) + metadata->size);
-  if(right_metadata->next != NULL) {
-    my_remove_from_free_list(metadata,);
-  }
- */
-  int bin_num = check_bin_num(metadata->size);
+  int bin_num = get_bin_num(metadata->size);
   metadata->next = my_heap.free_heads[bin_num];
   my_heap.free_heads[bin_num] = metadata;
 }
@@ -82,7 +73,7 @@ void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev) {
   if (prev) {
     prev->next = metadata->next;
   } else {
-    int bin_num = check_bin_num(metadata->size);
+    int bin_num = get_bin_num(metadata->size);
     my_heap.free_heads[bin_num] = metadata->next;
   }
   metadata->next = NULL;
@@ -127,7 +118,7 @@ void *my_malloc_to_specific_free_slot(size_t size, my_metadata_t *metadata) {
 // 4000. You are not allowed to use any library functions other than
 // mmap_from_system() / munmap_to_system().
 void *my_malloc(size_t size) {
-  int bin_num = check_bin_num(size);
+  int bin_num = get_bin_num(size);
   my_metadata_t *metadata;
   my_metadata_t *prev;
   my_metadata_t *best_metadata = NULL;
