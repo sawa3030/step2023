@@ -28,6 +28,8 @@ void munmap_to_system(void *ptr, size_t size);
 typedef struct my_metadata_t {
   size_t size;
   struct my_metadata_t *next;
+  size_t left_size;
+  struct my_metadata_t *prev;
 } my_metadata_t;
 
 typedef struct my_heap_t {
@@ -59,6 +61,13 @@ int check_bin_num(size_t size) {
 
 void my_add_to_free_list(my_metadata_t *metadata) {
   assert(!metadata->next);
+  /* // ... | left_metadata | object or free slot | metadata | free slot | right_metadata | object or free slot | ...
+  // 
+  my_metadata_t *right_metadata = (my_metadata_t *)((char *)(metadata + 1) + metadata->size);
+  if(right_metadata->next != NULL) {
+    my_remove_from_free_list(metadata,);
+  }
+ */
   int bin_num = check_bin_num(metadata->size);
   metadata->next = my_heap.free_heads[bin_num];
   my_heap.free_heads[bin_num] = metadata;
@@ -164,7 +173,7 @@ void *my_malloc(size_t size) {
     my_metadata_t *metadata = (my_metadata_t *)mmap_from_system(buffer_size);
     metadata->size = buffer_size - sizeof(my_metadata_t);
     metadata->next = NULL;
-    // 今OSからもらったメモリを使うことは確定しているので、他のメモリを探索せずにそのメモリを使う
+    // 今OSからもらったメモリを使うことは確定しているので、そのメモリを使う
     return my_malloc_to_specific_free_slot(size, metadata);
   }
 
@@ -219,4 +228,23 @@ void my_finalize() {
 void test() {
   // Implement here!
   assert(1 == 1); /* 1 is 1. That's always true! (You can remove this.) */
+  my_initialize();
+  int *ptr1 = (int *)my_malloc(100 * sizeof(int));
+  int *ptr = ptr1;
+  for(int i = 0; i < 100; i++) {
+    *ptr = 1;
+    ptr++;
+  }
+  
+  int *ptr2 = (int *)my_malloc(100 * sizeof(int));
+  ptr = ptr2;
+  for(int i = 0; i < 100; i++) {
+    *ptr = 2;
+    ptr++;
+  }
+
+  assert(*ptr1 == 1);
+  assert(*(ptr1 + 99) == 1);
+  assert(*ptr2 == 2);
+  assert(*(ptr2 + 99) == 2);
 }
