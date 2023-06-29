@@ -236,15 +236,29 @@ void test() {
     ptr++;
   }
   
+  // 異なるメモリが確保されるか
   int *ptr2 = (int *)my_malloc(100 * sizeof(int));
   ptr = ptr2;
   for(int i = 0; i < 100; i++) {
     *ptr = 2;
     ptr++;
   }
-
   assert(*ptr1 == 1);
   assert(*(ptr1 + 99) == 1);
+
+  // 新たにOSから4096のメモリをもらったとき
+  int *ptr3 = (int *)my_malloc(1000 * sizeof(int));
+  ptr = ptr3;
+  for(int i = 0; i < 1000; i++) {
+    *ptr = 3;
+    ptr++;
+  }
+
+  // メモリを解放するとき
+  my_free(ptr1);
+
   assert(*ptr2 == 2);
   assert(*(ptr2 + 99) == 2);
+  assert(*ptr3 == 3);
+  assert(*(ptr3 + 999) == 3);
 }
