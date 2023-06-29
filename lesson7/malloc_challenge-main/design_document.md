@@ -1,7 +1,7 @@
-### 第7週目宿題
+## 第7週目宿題
 ‐ best-fit mallocやfree list binを実装し、mallocの性能向上を計る
 
-## 様々な方法と考察
+### 様々な方法と考察
 - simple_malloc
        - 最初に見つけた空き領域を用いる方法で、既に実装されていたもの
        - 結果(Time[ms]とUtilization[%]について)
