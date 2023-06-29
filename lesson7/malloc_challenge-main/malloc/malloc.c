@@ -92,6 +92,27 @@ void my_initialize() {
   my_heap.dummy.next = NULL;
 }
 
+void *my_malloc_to_specific_free_slot(size_t size, my_metadata_t *metadata) {
+  void *ptr = metadata + 1;
+  size_t remaining_size = metadata->size - size;
+  if (remaining_size > sizeof(my_metadata_t)) {
+    metadata->size = size;
+    // Create a new metadata for the remaining free slot.
+    //
+    // ... | metadata | object | metadata | free slot | ...
+    //     ^          ^        ^
+    //     metadata   ptr      new_metadata
+    //                 <------><---------------------->
+    //                   size       remaining size
+    my_metadata_t *new_metadata = (my_metadata_t *)((char *)ptr + size);
+    new_metadata->size = remaining_size - sizeof(my_metadata_t);
+    new_metadata->next = NULL;
+    // Add the remaining free slot to the free list.
+    my_add_to_free_list(new_metadata);
+  }
+  return ptr;
+}
+
 // my_malloc() is called every time an object is allocated.
 // |size| is guaranteed to be a multiple of 8 bytes and meets 8 <= |size| <=
 // 4000. You are not allowed to use any library functions other than
@@ -143,10 +164,8 @@ void *my_malloc(size_t size) {
     my_metadata_t *metadata = (my_metadata_t *)mmap_from_system(buffer_size);
     metadata->size = buffer_size - sizeof(my_metadata_t);
     metadata->next = NULL;
-    // Add the memory region to the free list.
-    my_add_to_specific_free_list(metadata, 11);
-    // Now, try my_malloc() again. This should succeed.
-    return my_malloc(size);
+    // 今OSからもらったメモリを使うことは確定しているので、他のメモリを探索せずにそのメモリを使う
+    return my_malloc_to_specific_free_slot(size, metadata);
   }
 
   // |ptr| is the beginning of the allocated object.
