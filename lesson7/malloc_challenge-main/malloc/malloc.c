@@ -13,9 +13,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include<stdio.h>
-
-FILE *fp;
 
 //
 // Interfaces to get memory pages from OS
@@ -34,7 +31,7 @@ typedef struct my_metadata_t {
 } my_metadata_t;
 
 typedef struct my_heap_t {
-  my_metadata_t *free_heads[4];
+  my_metadata_t *free_heads[12];
   my_metadata_t dummy;
 } my_heap_t;
 
@@ -48,12 +45,14 @@ my_heap_t my_heap;
 //
 
 int check_bin_num(size_t size) {
-  int bin_num = 3;
-  for(int i = 0; i < 3; i++) {
-    if(size < (i+1) * 1000) {
+  int bin_num = 11;
+  int max_of_the_bin = 2;
+  for(int i = 0; i < 11; i++) {
+    if(size < max_of_the_bin) {
       bin_num = i;
       break;
     }
+    max_of_the_bin *= 2;
   }
   return bin_num;
 }
@@ -86,7 +85,7 @@ void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev) {
 
 // This is called at the beginning of each challenge.
 void my_initialize() {
-  for(int i = 0; i < 4; i++) {
+  for(int i = 0; i < 12; i++) {
     my_heap.free_heads[i] = &my_heap.dummy;
   }
   my_heap.dummy.size = 0;
@@ -106,7 +105,7 @@ void *my_malloc(size_t size) {
 
   // First-fit: Find the first free slot the object fits.
   // TODO: Update this logic to Best-fit!
-  while(bin_num < 4) {
+  while(bin_num < 12) {
     metadata = my_heap.free_heads[bin_num];
     prev = NULL;
 
@@ -145,15 +144,9 @@ void *my_malloc(size_t size) {
     metadata->size = buffer_size - sizeof(my_metadata_t);
     metadata->next = NULL;
     // Add the memory region to the free list.
-    my_add_to_specific_free_list(metadata, 3);
+    my_add_to_specific_free_list(metadata, 11);
     // Now, try my_malloc() again. This should succeed.
     return my_malloc(size);
-  }
-
-  if (fp) {
-    fprintf(fp, "%ld,", size);
-  } else {
-    fp = fopen("size.txt", "w");
   }
 
   // |ptr| is the beginning of the allocated object.
