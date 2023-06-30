@@ -28,6 +28,7 @@ void munmap_to_system(void *ptr, size_t size);
 typedef struct my_metadata_t {
   size_t size;
   struct my_metadata_t *next;
+  struct my_metadata_t *prev;
 } my_metadata_t;
 
 typedef struct my_heap_t {
@@ -57,26 +58,44 @@ int get_bin_num(size_t size) {
   return bin_num;
 }
 
-void my_add_to_free_list(my_metadata_t *metadata) {
-  assert(!metadata->next);
-  int bin_num = get_bin_num(metadata->size);
-  metadata->next = my_heap.free_heads[bin_num];
-  my_heap.free_heads[bin_num] = metadata;
-}
-
 void my_add_to_specific_free_list(my_metadata_t *metadata, int bin_num) {
   metadata->next = my_heap.free_heads[bin_num];
+  metadata->next->prev = metadata;
   my_heap.free_heads[bin_num] = metadata;
 }
 
 void my_remove_from_free_list(my_metadata_t *metadata, my_metadata_t *prev) {
   if (prev) {
     prev->next = metadata->next;
+    metadata->next->prev = metadata;
   } else {
     int bin_num = get_bin_num(metadata->size);
     my_heap.free_heads[bin_num] = metadata->next;
+    metadata->next->prev = NULL;
   }
   metadata->next = NULL;
+  metadata->prev = NULL;
+}
+
+void my_add_to_free_list(my_metadata_t *metadata) {
+  assert(!metadata->next);
+  assert(!metadata->prev);
+
+  void *ptr = metadata + 1;
+  my_metadata_t *metadata_right = (my_metadata_t *)((char *)ptr + metadata->size);
+  if(metadata_right->size != 0) { 
+    // metadata_rightがメモリの右端ではないとき
+    if(metadata_right->next != NULL) { 
+      // metadata_rightに対応する中身が空き領域であるとき
+      my_remove_from_free_list(metadata_right, metadata_right->prev);
+      metadata->size += sizeof(my_metadata_t *) + metadata_right->size;
+    }
+  }
+
+  int bin_num = get_bin_num(metadata->size);
+  metadata->next = my_heap.free_heads[bin_num];
+  metadata->next->prev = metadata;
+  my_heap.free_heads[bin_num] = metadata;
 }
 
 //
@@ -90,6 +109,7 @@ void my_initialize() {
   }
   my_heap.dummy.size = 0;
   my_heap.dummy.next = NULL;
+  my_heap.dummy.prev = NULL;
 }
 
 // my_malloc() is called every time an object is allocated.
@@ -141,10 +161,18 @@ void *my_malloc(size_t size) {
 
     size_t buffer_size = 4096;
     my_metadata_t *metadata = (my_metadata_t *)mmap_from_system(buffer_size);
-    metadata->size = buffer_size - sizeof(my_metadata_t);
+    metadata->size = buffer_size - 2 * sizeof(my_metadata_t);
     metadata->next = NULL;
-    // 今OSからもらったメモリを使うことは確定しているので、そのメモリを使う
+    metadata->prev = NULL;
+
     void *ptr = metadata + 1;
+    my_metadata_t *metadata_end = (my_metadata_t *)((char *)ptr + metadata->size);
+    metadata_end->size = 0;
+    metadata_end->next = NULL;
+    metadata_end->prev = NULL;
+    
+    // 今OSからもらったメモリを使うことは確定しているので、そのメモリを使う
+    ptr = metadata + 1;
     size_t remaining_size = metadata->size - size;
     if (remaining_size > sizeof(my_metadata_t)) {
       metadata->size = size;
@@ -158,6 +186,7 @@ void *my_malloc(size_t size) {
       my_metadata_t *new_metadata = (my_metadata_t *)((char *)ptr + size);
       new_metadata->size = remaining_size - sizeof(my_metadata_t);
       new_metadata->next = NULL;
+      new_metadata->prev = NULL;
       // Add the remaining free slot to the free list.
       my_add_to_free_list(new_metadata);
     }
@@ -174,7 +203,6 @@ void *my_malloc(size_t size) {
 
   // Remove the free slot from the free list.
   my_remove_from_free_list(best_metadata, best_prev);
-
   if (remaining_size > sizeof(my_metadata_t)) {
     best_metadata->size = size;
     // Create a new metadata for the remaining free slot.
@@ -187,6 +215,7 @@ void *my_malloc(size_t size) {
     my_metadata_t *new_metadata = (my_metadata_t *)((char *)ptr + size);
     new_metadata->size = remaining_size - sizeof(my_metadata_t);
     new_metadata->next = NULL;
+    new_metadata->prev = NULL;
     // Add the remaining free slot to the free list.
     my_add_to_free_list(new_metadata);
   }
@@ -249,4 +278,4 @@ void test() {
   assert(*(ptr2 + 99) == 2);
   assert(*ptr3 == 3);
   assert(*(ptr3 + 999) == 3);
-}
+} 
