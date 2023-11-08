@@ -88,7 +88,7 @@ void my_add_to_free_list(my_metadata_t *metadata) {
     if(metadata_right->next != NULL) { 
       // metadata_rightに対応する中身が空き領域であるとき
       my_remove_from_free_list(metadata_right, metadata_right->prev);
-      metadata->size += sizeof(my_metadata_t *) + metadata_right->size;
+      metadata->size += sizeof(my_metadata_t) + metadata_right->size;
     }
   }
 
